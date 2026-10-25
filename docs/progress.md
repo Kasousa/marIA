@@ -1,7 +1,7 @@
 # Progresso
 
 Diário de sessões, mais recente em cima. Cada entrada tem no máximo ~10 linhas.
-Atualize pela skill `/handoff` ao fim de cada sessão de trabalho.
+Atualize pela skill `/handoff` ao fim de cada sessão de trabalho. Ao concluir uma fase, as entradas dela vão para `docs/progress/fase-<n>.md`.
 
 Formato:
 
@@ -14,6 +14,18 @@ Formato:
 ```
 
 ---
+
+## 2026-10-24 · feature/adr-0003-infra · melhorias do harness
+- Feito: testes do harness no repo (scripts/test-harness.sh + fixtures em scripts/testdata, `make harness-test` no `make check`); spec dividida em docs/spec/ com glossário; CLAUDE.md por pasta (infra/, .github/, e2e/); rotação do progress por fase; catálogo de eventos gerado como critério da P2-01.
+- Verificado com: `make harness-test` (71 casos), teste de mutação (regra de push quebrada de propósito, 12 falhas detectadas), `scripts/archcheck.sh` ok, nenhuma linha da spec antiga perdida na divisão.
+- Pendente / bloqueios: os mesmos da entrada abaixo.
+- Próximo passo: administrador aprova o PR; depois, /plan-phase 1 e feature/fase-1-monorepo.
+
+## 2026-10-24 · feature/adr-0003-infra · decisões da Fase 1 (ADR 0003)
+- Feito: região us-east-1, conta AWS única, entrada por API Gateway HTTP API + VPC Link + Cloud Map (sem ALB), domínio próprio no backlog. Spec, CLAUDE.md, plano da Fase 1 e features P1-05..P1-07 atualizados.
+- Verificado com: revisão de texto; features.json validado com jq. Disponibilidade do Haiku 4.5 por região conferida na documentação da AWS.
+- Pendente / bloqueios: nome do bucket de state; estimativa de custo em us-east-1. O administrador pediu para não iniciar a execução do plano ainda.
+- Próximo passo: o administrador terminar de revisar o entendimento do projeto; depois, /plan-phase 1 e feature/fase-1-monorepo.
 
 ## 2026-10-24 · main · Git Flow (ADR 0002)
 - Feito: adotado o Git Flow padrão (feature/* -> develop; release/x.y.z e hotfix/x.y.z -> main com back-merge). O fluxo simplificado testado antes foi revertido. Spec, CLAUDE.md, ADR 0002, features P1-04/P1-08..P1-13, plano da Fase 1, HARNESS.md, /handoff e template de PR atualizados.

@@ -2,7 +2,7 @@ SHELL := /bin/bash
 TF_DIRS := $(wildcard infra/envs/staging/base infra/envs/staging/compute infra/envs/prod)
 
 .DEFAULT_GOAL := help
-.PHONY: help require-go fmt fmt-check vet lint test arch check tf-fmt tf-check e2e
+.PHONY: help require-go fmt fmt-check vet lint test arch harness-test check tf-fmt tf-check e2e
 
 help: ## List targets
 	@grep -E '^[a-z0-9-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  %-10s %s\n", $$1, $$2}'
@@ -11,10 +11,10 @@ require-go:
 	@test -f go.mod || { echo "no go.mod yet: run step 1 of docs/plans/active/fase-1-fundacao.md"; exit 1; }
 
 fmt: require-go ## Format Go code
-	gofmt -w $$(git ls-files '*.go')
+	gofmt -w $$(git ls-files '*.go' ':!:**/testdata/**')
 
 fmt-check: require-go
-	@out=$$(gofmt -l $$(git ls-files '*.go')); test -z "$$out" || { echo "gofmt needed:"; echo "$$out"; exit 1; }
+	@out=$$(gofmt -l $$(git ls-files '*.go' ':!:**/testdata/**')); test -z "$$out" || { echo "gofmt needed:"; echo "$$out"; exit 1; }
 
 vet: require-go ## go vet
 	go vet ./...
@@ -28,7 +28,10 @@ test: require-go ## Unit tests with race detector (pipeline gate)
 arch: ## Architecture rules from CLAUDE.md
 	@scripts/archcheck.sh
 
-check: fmt-check vet lint arch test ## Everything that must be green before a PR
+harness-test: ## Tests for the harness itself (hooks, archcheck)
+	@scripts/test-harness.sh
+
+check: fmt-check vet lint arch harness-test test ## Everything that must be green before a PR
 
 tf-fmt: ## Format Terraform
 	terraform fmt -recursive infra

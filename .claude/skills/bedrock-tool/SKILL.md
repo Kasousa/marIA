@@ -5,7 +5,7 @@ description: Adiciona ou altera uma ferramenta que o Claude Haiku 4.5 pode chama
 
 # Ferramenta do Bedrock
 
-Contexto: seção "Bedrock: modelo, prompt e ferramentas" da `docs/spec.md`. O modelo nunca grava nada; ele escolhe a ferramenta, o conversation valida e chama o reminders.
+Contexto: `docs/spec/bedrock.md`. O modelo nunca grava nada; ele escolhe a ferramenta, o conversation valida e chama o reminders.
 
 1. **Definição** em `internal/conversation/tools/`: nome em `snake_case`, descrição curta em inglês dizendo quando usar e quando perguntar à cliente, e JSON Schema de entrada com `required` explícito. Datas em ISO 8601 com offset; horários `HH:MM`.
 2. **Validação** no serviço, nunca confiando no modelo: data no futuro, horário válido, nome não vazio, prazo coerente. Entrada inválida volta ao modelo como `toolResult` com `status: error` e uma mensagem que o ajude a perguntar à cliente o que falta.

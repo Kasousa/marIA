@@ -5,7 +5,7 @@ description: Cria o esqueleto de um microserviço da marIA (gateway, conversatio
 
 # Novo serviço
 
-Entrada: nome do serviço (um de `gateway`, `conversation`, `reminders`, `outbound`, `relay`). Leia na `docs/spec.md` a linha dele na tabela de serviços (publica / consome) e a tabela DynamoDB de que ele é dono.
+Entrada: nome do serviço (um de `gateway`, `conversation`, `reminders`, `outbound`, `relay`). Leia em `docs/spec/arquitetura.md` a linha dele na tabela de serviços (publica / consome) e a tabela DynamoDB de que ele é dono.
 
 Crie, nesta ordem, com testes junto:
 

@@ -2,7 +2,7 @@
 
 - Features: <ids do docs/features.json>
 - Branch: feature/<nome>
-- Spec: <seções do docs/spec.md que valem para este plano>
+- Spec: <arquivos de docs/spec/ que valem para este plano>
 - Status: rascunho | aprovado | em execução | concluído
 
 ## Objetivo

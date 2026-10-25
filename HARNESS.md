@@ -119,11 +119,16 @@ para isso).
 
 ```
 CLAUDE.md                         camada 1: instruções sempre carregadas
+infra/CLAUDE.md                   camada 1: regras de Terraform (carregadas ao trabalhar em infra/)
+.github/CLAUDE.md                 camada 1: regras dos workflows
+e2e/CLAUDE.md                     camada 1: regras da suíte de staging
 HARNESS.md                        este guia
 docs/
-  spec.md                         camada 2: fonte da verdade do produto
+  spec/                           camada 2: fonte da verdade do produto (um arquivo por área)
+    README.md                     índice, visão geral, glossário do domínio e roteiro
   features.json                   camada 3: estado do roteiro
-  progress.md                     camada 3: memória entre sessões
+  progress.md                     camada 3: memória entre sessões (fase atual)
+  progress/fase-<n>.md            camada 3: histórico de fases concluídas
   plans/active/ completed/        camada 3: planos de execução
   plans/TEMPLATE.md
   adr/                            camada 2: decisões e seus porquês
@@ -135,6 +140,8 @@ docs/
   skills/                         camada 5: receitas
 Makefile, .golangci.yml           camada 6: verificação local
 scripts/archcheck.sh              camada 6: regras de arquitetura
+scripts/test-harness.sh           camada 6: testes do próprio harness (hooks e archcheck)
+scripts/testdata/                 camada 6: fixtures do archcheck (violações e caso limpo)
 .github/workflows/ (Fase 1)       camada 7: esteira e portões finais
 .github/pull_request_template.md  camada 7: checklist de PR
 ```
@@ -143,9 +150,10 @@ scripts/archcheck.sh              camada 6: regras de arquitetura
 - **O que é:** um arquivo que o Claude Code injeta no início de toda sessão.
 - **Aqui:** stack, estrutura, regras de arquitetura, de produto e de segurança, a esteira e a seção "Harness" com os ponteiros.
 - **Cuidado:** cada linha custa contexto em toda sessão. Se uma regra só vale para uma tarefa (por exemplo, como criar uma ferramenta do Bedrock), ela vai para uma skill.
+- **CLAUDE.md por pasta:** o Claude Code também carrega o `CLAUDE.md` de uma subpasta quando trabalha em arquivos dela. As regras de Terraform ficam em `infra/CLAUDE.md`, as dos workflows em `.github/CLAUDE.md` e as do E2E em `e2e/CLAUDE.md`. Assim, a raiz guarda só o que vale sempre e não cresce a cada área nova. Regra para pastas novas: se as regras de uma pasta só importam para quem trabalha nela, elas vão para um CLAUDE.md da pasta.
 
-### Camada 2: conhecimento (`docs/spec.md`, `docs/adr/`, `docs/runbooks/`)
-- **Spec:** descreve o que a marIA faz. Mudou o comportamento, muda a spec primeiro (ou no mesmo PR).
+### Camada 2: conhecimento (`docs/spec/`, `docs/adr/`, `docs/runbooks/`)
+- **Spec:** descreve o que a marIA faz, dividida por área (produto, arquitetura, WhatsApp, Bedrock, infra, esteira), com índice, visão geral, glossário e roteiro no `README.md`. O agente abre só o arquivo de que a tarefa precisa. Mudou o comportamento, muda a spec primeiro (ou no mesmo PR).
 - **ADRs:** registram decisões difíceis de reverter e o porquê. Evitam que o agente (ou você daqui a 3 meses) reabra uma discussão já resolvida.
 - **Runbooks:** passo a passo de operação. Também deixam claro o que o agente **não** faz (bootstrap do state, cadastro de templates na Meta).
 
@@ -179,6 +187,7 @@ sempre negado.
 
 ### Camada 6: verificação local
 - `make check`: `gofmt -l`, `go vet`, `golangci-lint`, `scripts/archcheck.sh` e `go test ./... -race`. Precisa estar verde antes de qualquer PR.
+- `make harness-test`: testa o próprio harness. Roda os hooks contra dezenas de comandos num repositório descartável (o que deve passar e o que deve ser bloqueado) e roda o archcheck contra as fixtures de `scripts/testdata/`. Cada linha marcada com `want:` precisa ser reportada, e o caso limpo precisa passar. Faz parte do `make check` e, na Fase 1, do `ci`. **O harness também é código:** mudou um hook ou uma regra, o teste muda no mesmo PR.
 - `make tf-check`: `terraform fmt -check` e `terraform validate` sem backend.
 - `.golangci.yml`:
   - proíbe o pacote `log` (use `slog` via `pkg/logging`), o SDK da AWS v1 e `fmt.Print*`;
@@ -187,7 +196,7 @@ sempre negado.
 - `scripts/archcheck.sh`: as regras de arquitetura do CLAUDE.md transformadas em checagens. Um serviço não importa outro, só o outbound envia à Meta, cada serviço só toca a própria tabela, `graph.facebook.com` só em `pkg/meta`, relógio injetado em vez de `time.Now()`, logs de texto e telefone sempre com `Mask()`. Para uma exceção justificada, use o comentário `archcheck:allow <motivo>` na linha.
 
 ### Camada 7: esteira (Fase 1)
-O modelo de branches é o Git Flow padrão (ADR 0002 e seção "Esteira de CI/CD" da spec):
+O modelo de branches é o Git Flow padrão (ADR 0002 e `docs/spec/esteira.md`):
 
 ```
 main      ●────────────────────●──────────────●────────▶  prod (tags v0.1.0, v0.1.1)
@@ -317,7 +326,7 @@ que só leem.
    `ci` roda no PR; você revisa e faz o merge, que leva o código para
    staging. A feature só vira `verified_staging` com o E2E verde.
    Para levar a prod, você cria a `release/x.y.z` (veja "Ciclo de uma
-   versão" na spec).
+   versão" em `docs/spec/esteira.md`).
 6. **Melhorar o harness.** Leia a seção "Lições para o harness" do plano.
    Transforme as lições baratas em regra agora; as caras viram item de
    backlog.
@@ -333,8 +342,8 @@ Implementar a feature **P2-03 (whatsapp-gateway)**:
 
 1. Você: "vamos começar a P2-03". O hook já mostrou que a P2-01 e a P2-02
    estão `done_local`.
-2. Você: `/plan-phase P2-03`. O agente lê "WhatsApp Cloud API" e
-   "Arquitetura" na spec e cria `docs/plans/active/P2-03-gateway.md`.
+2. Você: `/plan-phase P2-03`. O agente lê `docs/spec/whatsapp.md` e
+   `docs/spec/arquitetura.md` e cria `docs/plans/active/P2-03-gateway.md`.
    - **Passos:** validar a assinatura, responder 200, aplicar a allowlist, publicar `MessageReceived`, módulo Terraform.
    - **Decisões em aberto:** "a allowlist é recarregada do Secrets Manager a cada N minutos ou só no boot?".
 3. Você responde "a cada 5 minutos" e aprova. O agente marca a P2-03 como
@@ -412,6 +421,7 @@ que não ter harness. Por isso:
   Dá para agendar com `/schedule`.
 - **Quando a spec mudar:** atualize no mesmo PR o CLAUDE.md (se for regra
   geral), os agents e skills afetados e os critérios em `features.json`.
+- **Ao concluir uma fase:** o `/handoff` move as entradas dela do `progress.md` para `docs/progress/fase-<n>.md`, e o arquivo principal fica curto.
 - **Quando uma regra mecânica der falso positivo:** ajuste a regra ou use
   `archcheck:allow <motivo>`. Nunca desligue a checagem inteira.
 
