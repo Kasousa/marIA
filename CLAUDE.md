@@ -3,13 +3,13 @@
 Assistente 100% via WhatsApp que lembra a cliente de remédios, consultas e de
 beber água, em tom leve com humor e imagens do Snoopy. Projeto de estudo de
 microserviços orientados a eventos na AWS, operado por um administrador.
-A especificação completa está em docs/spec.md: leia antes de mudanças grandes.
+A especificação está em docs/spec/ (um arquivo por área; índice e glossário no README.md): leia a parte relevante antes de mudanças grandes.
 
 ## Stack
 - Go (versão estável mais recente), net/http + chi, aws-sdk-go-v2, log/slog
 - Docker multi-stage (imagem final distroless), ECS Fargate
 - Terraform (infra/); deploy só pela esteira do GitHub Actions (OIDC, sem chaves)
-- AWS: ECS, DynamoDB, SNS/SQS, EventBridge Scheduler, S3, Bedrock (Claude Haiku 4.5), Secrets Manager, CloudWatch Logs
+- AWS (us-east-1, uma conta para staging e prod; ADR 0003): ECS, API Gateway HTTP API + VPC Link + Cloud Map, DynamoDB, SNS/SQS, EventBridge Scheduler, S3, Bedrock (Claude Haiku 4.5), Secrets Manager, CloudWatch Logs
 - Sem ambiente local de integração: testes unitários com fakes localmente, integração em staging
 - Não existe front-end. Não existe OAuth 2 nem Datadog na v1 (Datadog vem na v2).
 
@@ -49,14 +49,10 @@ A especificação completa está em docs/spec.md: leia antes de mudanças grande
 - Dependências externas (AWS, Bedrock, Meta) entram por interfaces pequenas; localmente só fakes.
 - Relógio e aleatoriedade sempre injetados; datas fixas com offset -03:00 nos testes.
 - Cubra sempre: mensagem duplicada, janela de 24h aberta e fechada, item cancelado quando o ReminderDue chega, entrada inválida das ferramentas do Bedrock.
-- Nunca use telefone ou texto real de cliente em fixtures. E2E fica em e2e/ com build tag `e2e`.
+- Nunca use telefone ou texto real de cliente em fixtures.
 
-## Infra
-- Uma task role por serviço, só com a própria tabela e as próprias filas; nada de `*` sem justificativa.
-- OIDC: role de staging só pela develop, release/* e hotfix/*; role de prod só pela main no environment production; jobs de feature/* não acessam a AWS.
-- staging/base guarda os dados; staging/compute (ALB, ECS, schedules) é destruída todo dia, então nada com dados nela.
-- Custo (orçamento R$150/mês): Fargate Spot em staging, 0,25 vCPU / 0,5 GB, sem NAT, logs com 14 dias; todo recurso novo com custo fixo vem com estimativa mensal.
-- Workflows com `permissions:` mínimas por job e actions de terceiros fixadas por SHA.
+## Regras por pasta
+- infra/CLAUDE.md (Terraform: IAM, OIDC, camadas do staging, custo), .github/CLAUDE.md (workflows) e e2e/CLAUDE.md (suíte de staging) são carregados quando você trabalha nessas pastas.
 
 ## Git Flow e esteira (ADR 0002)
 - `main` = prod, `develop` = integração e staging.
@@ -73,7 +69,8 @@ A especificação completa está em docs/spec.md: leia antes de mudanças grande
 - Estado do roteiro: docs/features.json (status só avança com evidência).
 - Memória entre sessões: docs/progress.md; planos em docs/plans/active/; decisões em docs/adr/.
 - Comece trabalho novo com /plan-phase e termine a sessão com /handoff.
-- `make check` = fmt, vet, golangci-lint, scripts/archcheck.sh e testes com -race.
+- `make check` = fmt, vet, golangci-lint, scripts/archcheck.sh, `make harness-test` e testes com -race.
+- Mudou um hook ou o archcheck: acrescente o caso em scripts/test-harness.sh (ou em scripts/testdata/) no mesmo PR.
 - Revisores do projeto (.claude/agents/): architecture-guardian (código) e persona-reviewer (texto para a cliente). Para o resto, /code-review e /security-review. Manutenção dos docs: /garden.
 - Hooks bloqueiam terraform apply/destroy, docker push, AWS CLI que altera recursos, commit/merge em main/develop, push fora de feature/*, release/x.y.z e hotfix/x.y.z, e gh pr merge.
 - Quando errar por falta de regra, proponha a regra (doc, lint, archcheck ou hook), não só a correção.

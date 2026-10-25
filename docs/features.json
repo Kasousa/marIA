@@ -1,5 +1,5 @@
 {
-  "_instructions": "Fonte do estado do roteiro (docs/spec.md, seção Roteiro). Status: todo | in_progress | done_local | verified_staging | released. Avance o status só com evidência e registre-a em 'evidence'. Não remova features nem altere 'acceptance' sem pedido do administrador.",
+  "_instructions": "Fonte do estado do roteiro (docs/spec/README.md, seção Roteiro de implementação). Status: todo | in_progress | done_local | verified_staging | released. Avance o status só com evidência e registre-a em 'evidence'. Não remova features nem altere 'acceptance' sem pedido do administrador.",
   "features": [
     {
       "id": "P1-01",
@@ -54,6 +54,7 @@
       "title": "staging/base",
       "acceptance": [
         "network, ECR, KMS, secrets vazios",
+        "API Gateway HTTP API, VPC Link e namespace Cloud Map (URL estável)",
         "terraform validate verde"
       ],
       "status": "todo",
@@ -64,8 +65,8 @@
       "phase": 1,
       "title": "staging/compute com hello",
       "acceptance": [
-        "ALB HTTPS + ECS Fargate Spot",
-        "health check verde"
+        "ECS Fargate Spot com o hello registrado no Cloud Map",
+        "GET /healthz verde pela URL execute-api do API Gateway"
       ],
       "status": "todo",
       "evidence": ""
@@ -164,7 +165,8 @@
       "acceptance": [
         "MessageReceived, SendMessage, MessageSent",
         "event_id, occurred_at ISO 8601 com offset",
-        "testes de serialização"
+        "testes de serialização",
+        "catálogo de eventos gerado a partir de pkg/events (go generate) em docs/spec/eventos.md, verificado no make check"
       ],
       "status": "todo",
       "evidence": ""

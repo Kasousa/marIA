@@ -2,9 +2,10 @@
 # Structural checks for the marIA architecture rules in CLAUDE.md.
 # Heuristic, grep-based, no Go toolchain required. Each failure prints file:line and the rule.
 # To allow a justified exception, put "archcheck:allow <reason>" on the offending line.
+# ARCHCHECK_ROOT overrides the directory to check (used by scripts/test-harness.sh with fixtures).
 set -uo pipefail
 
-root="$(cd "$(dirname "$0")/.." && pwd)"
+root="${ARCHCHECK_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}"
 cd "$root" || exit 1
 
 services="gateway conversation reminders outbound relay"
@@ -17,7 +18,7 @@ report() { # file:line, rule
 
 go_files() { # dir
   [[ -d "$1" ]] || return 0
-  find "$1" -type f -name '*.go' -not -path '*/vendor/*'
+  find "$1" -type f -name '*.go' -not -path '*/vendor/*' -not -path '*/testdata/*'
 }
 
 table_owner() {
@@ -68,7 +69,7 @@ done
 while IFS=: read -r f line content; do
   [[ "$content" == *archcheck:allow* ]] && continue
   report "$f:$line" "graph.facebook.com must only appear in pkg/meta"
-done < <(grep -rnE 'graph\.facebook\.com' --include='*.go' . 2>/dev/null | grep -v '^\./pkg/meta/')
+done < <(grep -rnE 'graph\.facebook\.com' --include='*.go' --exclude-dir=testdata --exclude-dir=vendor . 2>/dev/null | grep -v '^\./pkg/meta/')
 
 # Rule 5: business logic uses an injected clock, not time.Now().
 while IFS= read -r f; do
@@ -84,7 +85,7 @@ done < <(go_files internal)
 while IFS=: read -r f line content; do
   [[ "$content" == *archcheck:allow* || "$content" == *Mask\(* ]] && continue
   report "$f:$line" "log attribute looks like message text or phone; wrap it with logging.Mask()"
-done < <(grep -rnE '\.(Info|Warn|Error|Debug|Log)(Context)?\(.*"(phone|to|from|text|body|message|caption)"' --include='*.go' internal cmd pkg 2>/dev/null | grep -v '_test\.go:')
+done < <(grep -rnE '\.(Info|Warn|Error|Debug|Log)(Context)?\(.*"(phone|to|from|text|body|message|caption)"' --include='*.go' --exclude-dir=testdata internal cmd pkg 2>/dev/null | grep -v '_test\.go:')
 
 if [[ $fail -ne 0 ]]; then
   echo "archcheck: FAILED (see CLAUDE.md, Regras de arquitetura)"

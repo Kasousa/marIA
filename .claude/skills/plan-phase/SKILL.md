@@ -7,7 +7,7 @@ description: Cria ou atualiza um plano de execução em docs/plans/active/ para 
 
 1. Identifique o alvo: número da fase ou ids de feature (`P2-03`...). Se não estiver claro, pergunte.
 2. Leia:
-   - a seção correspondente de "Roteiro de implementação" em `docs/spec.md` e as seções técnicas que ela cita;
+   - a fase correspondente no "Roteiro de implementação" de `docs/spec/README.md` e os arquivos de `docs/spec/` que ela envolve;
    - as features do alvo em `docs/features.json` (critérios de aceite);
    - `docs/progress.md` (última entrada) e planos em `docs/plans/active/`, para não duplicar.
 3. Se já existir plano ativo para o alvo, atualize-o em vez de criar outro.

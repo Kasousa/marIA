@@ -4,6 +4,8 @@ set -uo pipefail
 
 path=$(jq -r '.tool_input.file_path // ""')
 [[ -f "$path" ]] || exit 0
+# Fixtures are intentionally unformatted or "broken" (unused imports); never touch them.
+[[ "$path" == */testdata/* ]] && exit 0
 
 case "$path" in
   *.go)

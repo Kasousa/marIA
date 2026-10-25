@@ -2,7 +2,7 @@
 
 - Features: P1-01 a P1-13
 - Branch: uma `feature/*` por grupo de passos (ex.: `feature/fase-1-monorepo`, `feature/fase-1-terraform`, `feature/fase-1-workflows`)
-- Spec: "Infraestrutura e ambientes", "Liga/desliga do staging", "Esteira de CI/CD", "Roteiro de implementação" (item 1)
+- Spec: `docs/spec/infra.md`, `docs/spec/esteira.md`, `docs/spec/README.md` (Roteiro, item 1)
 - Status: rascunho
 
 ## Objetivo
@@ -12,11 +12,12 @@ O serviço `hello` com testes sobe em staging por um merge na `develop`, uma `re
 Qualquer serviço real (gateway, conversation...), DynamoDB de negócio, SNS/SQS, Bedrock.
 
 ## Decisões em aberto
-- [ ] Caminho do módulo Go (sugestão: `github.com/Kasousa/maria`).
-- [ ] Região AWS (sugestão: `us-east-1`, onde o Haiku 4.5 no Bedrock e o preço de Fargate são mais simples; `sa-east-1` deixa os dados no Brasil mas custa mais).
-- [ ] Domínio para o ALB com HTTPS: o webhook da Meta exige certificado válido, então é preciso um domínio (Route 53 ou externo) e um certificado ACM por ambiente.
-- [ ] Custo do ALB em prod (sempre ligado) dentro do orçamento de R$150/mês: confirmar preço antes do primeiro deploy, como a spec pede.
-- [ ] Nome do bucket de state e da conta AWS (uma conta para os dois ambientes ou duas).
+- [x] Caminho do módulo Go: `github.com/Kasousa/maria`.
+- [x] Região AWS: `us-east-1` (ADR 0003).
+- [x] Contas AWS: uma só, a pessoal, para staging e prod (ADR 0003).
+- [x] HTTPS do webhook: API Gateway HTTP API com a URL padrão `execute-api`, sem ALB; domínio próprio em melhorias futuras (ADR 0003).
+- [ ] Nome do bucket de state (sugestão: `maria-tfstate-<id da conta>`).
+- [ ] Custos em `us-east-1` (Fargate, API Gateway, Bedrock) dentro de R$150/mês: confirmar na calculadora da AWS antes do primeiro deploy.
 
 ## Passos
 
@@ -28,7 +29,7 @@ Qualquer serviço real (gateway, conversation...), DynamoDB de negócio, SNS/SQS
 
 ### Terraform (P1-04 a P1-07)
 - [ ] 5. `infra/bootstrap/`: bucket de state com versionamento e lock nativo do S3 (aplicado uma única vez pelo administrador, documentado em `docs/runbooks/bootstrap.md`).
-- [ ] 6. Módulos `network`, `ecs-cluster`, `ecs-service`, `github-oidc`, mais ECR e KMS.
+- [ ] 6. Módulos `network`, `api-gateway` (HTTP API, VPC Link, namespace Cloud Map), `ecs-cluster`, `ecs-service` (registro SRV no Cloud Map), `github-oidc`, mais ECR e KMS.
 - [ ] 7. `envs/staging/base`, `envs/staging/compute`, `envs/prod`. `terraform fmt -check` e `validate` verdes.
 - [ ] 8. Budget alarm em 80% e 100%.
 
