@@ -10,8 +10,8 @@
         "cmd/hello com /healthz",
         "make check verde"
       ],
-      "status": "todo",
-      "evidence": ""
+      "status": "done_local",
+      "evidence": "make check verde em 2026-10-25 (feature/fase-1-monorepo): go.mod, cmd/hello, internal/hello com testes; binário testado à mão (/healthz, healthcheck, SIGTERM)"
     },
     {
       "id": "P1-02",
@@ -21,8 +21,8 @@
         "Mask de telefone E.164 e de texto livre",
         "testes table-driven"
       ],
-      "status": "todo",
-      "evidence": ""
+      "status": "done_local",
+      "evidence": "make check verde em 2026-10-25 (feature/fase-1-monorepo): pkg/logging Mask() e MaskingHandler (qualquer tipo sob chave sensível, chaves sem diferenciar maiúsculas, telefones dentro de erros) e pkg/httpx.Recoverer; 27 casos table-driven com teste de vazamento; revisado pelo architecture-guardian"
     },
     {
       "id": "P1-03",
@@ -32,8 +32,8 @@
         "imagem final distroless/static",
         "um Dockerfile parametrizado por serviço"
       ],
-      "status": "todo",
-      "evidence": ""
+      "status": "done_local",
+      "evidence": "docker build --platform linux/arm64 --build-arg SERVICE=hello em 2026-10-25: imagem arm64, nonroot, 3,6 MB; container responde /healthz, `/app healthcheck` exit 0, docker stop com shutdown limpo; build falha sem SERVICE, com amd64 e com serviço inexistente"
     },
     {
       "id": "P1-04",
@@ -43,7 +43,8 @@
         "state remoto em S3 com lock nativo",
         "role de staging assumível só pela develop, release/* e hotfix/*",
         "role de prod só pela main no environment production",
-        "jobs de feature/* sem acesso à AWS"
+        "jobs de feature/* sem acesso à AWS",
+        "ECR e OIDC em infra/envs/shared, fora das camadas de ambiente"
       ],
       "status": "todo",
       "evidence": ""
@@ -76,9 +77,10 @@
       "phase": 1,
       "title": "Ambiente prod",
       "acceptance": [
-        "mesmos módulos de staging",
+        "mesmos módulos de staging, tasks ARM64 em Fargate Spot",
         "circuit breaker com rollback",
-        "budget alarm 80% e 100%"
+        "schedules 00:00 (desiredCount 0) e 05:50 (restaura) em America/Sao_Paulo",
+        "budget alarm 80% e 100% no bootstrap, e-mail fora do repositório"
       ],
       "status": "todo",
       "evidence": ""
@@ -285,7 +287,8 @@
       "title": "Consumidor ReminderDue",
       "acceptance": [
         "descarta item cancelado",
-        "DLQ reminder-due-dlq com alarme"
+        "DLQ reminder-due-dlq com alarme",
+        "ReminderDue com mais de REMINDER_MAX_DELAY (15 min) de atraso é descartado e logado"
       ],
       "status": "todo",
       "evidence": ""

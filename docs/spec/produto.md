@@ -74,6 +74,7 @@ Os lembretes de água começam ativos para a cliente e nunca esperam resposta.
 - Nenhuma resposta altera agendamentos.
 - O histórico recente da conversa (últimas 20 mensagens) vai como contexto para o Bedrock.
 - Áudio ou imagem enviados por ela recebem uma resposta carinhosa dizendo que, por enquanto, a marIA só entende texto.
+- Prod fica desligado das 00:00 às 05:50. Mensagens nesse horário são respondidas, e encaminhadas ao administrador, depois que prod religa (a Meta reenvia o webhook). Lembretes que venceriam nesse horário não são enviados (ADR 0004).
 
 ### F5. Encaminhamento para o administrador
 

@@ -10,3 +10,4 @@ Complementa o CLAUDE.md da raiz. Detalhes em docs/spec/esteira.md e no ADR 0002.
 - Tag da imagem = `git rev-parse HEAD^{tree}`; prod nunca faz rebuild e exige staging-ok.
 - `concurrency` de staging para nunca rodar dois deploys de staging ao mesmo tempo.
 - O ci também roda `make harness-test`, para os guarda-corpos do harness não quebrarem sem ninguém perceber.
+- Build de imagem sempre com `--platform linux/arm64` (ADR 0004); o Dockerfile não fixa a arquitetura.
