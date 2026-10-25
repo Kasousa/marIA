@@ -11,7 +11,7 @@ Os dois ambientes ficam na mesma conta AWS (a conta pessoal do administrador), n
 **Stack**
 
 - Serviços em Go (versão estável mais recente), com `net/http` + `chi`, `aws-sdk-go-v2` e `log/slog`.
-- Imagens Docker multi-stage, finais em `distroless/static`, publicadas no ECR com a tag do commit.
+- Imagens Docker multi-stage `linux/arm64`, finais em `distroless/static`, publicadas no ECR com a tag do hash da árvore do Git.
 - Mensageria: SNS (tópico `maria-events`) com filas SQS por consumidor, cada uma com DLQ.
 - Segredos (token da Meta, app secret, allowlist) no Secrets Manager.
 - Logs básicos em JSON no CloudWatch Logs, com retenção de 14 dias e sem texto de mensagem em claro. Observabilidade completa com Datadog fica para a v2.
@@ -22,23 +22,26 @@ Os dois ambientes ficam na mesma conta AWS (a conta pessoal do administrador), n
 |  | staging | prod |
 | --- | --- | --- |
 | Orquestração | ECS Fargate, 1 task por serviço | ECS Fargate, 1 task por serviço, deployment circuit breaker com rollback |
-| Tamanho das tasks | 0,25 vCPU / 0,5 GB, Fargate Spot | 0,25 vCPU / 0,5 GB |
+| Tamanho das tasks | 0,25 vCPU / 0,5 GB, ARM64, Fargate Spot | 0,25 vCPU / 0,5 GB, ARM64, Fargate Spot (ADR 0004) |
 | Número da marIA | Teste | Oficial |
 | Usuária | Número simulador | Cliente |
-| Disponibilidade | Liga/desliga, desligado por padrão | Sempre ligado |
+| Disponibilidade | Liga/desliga, desligado por padrão | Ligado das 05:50 às 00:00; desligado das 00:00 às 05:50 por dois schedules que zeram e restauram o `desiredCount` (ADR 0004) |
 | Entrada do webhook | API Gateway HTTP API → VPC Link → Cloud Map → task do gateway | Igual a staging |
 | Rede | Subnets públicas (tasks com IP público para sair à internet), security groups restritos, sem NAT Gateway; só o VPC Link alcança o gateway | Igual a staging |
 
 **Estrutura do Terraform**
 
 - `modules/`: `network`, `api-gateway`, `ecs-cluster`, `ecs-service`, `messaging`, `dynamodb`, `scheduler`, `media-bucket`, `github-oidc`.
+- `bootstrap/`: bucket de state e budget alarm; aplicado uma vez à mão pelo administrador.
+- `envs/shared`: recursos da conta usados pelos dois ambientes (repositórios ECR, provedor OIDC e roles da esteira).
 - `envs/staging/base`, `envs/staging/compute` e `envs/prod`, cada um com state remoto próprio no S3 (lock nativo do S3).
 - O módulo `github-oidc` cria o provedor OIDC e uma role por ambiente, para a esteira acessar a AWS sem chaves de acesso.
 
 **Custos**
 
 - Orçamento de R$150/mês para os dois ambientes juntos. Staging fica desligado por padrão e só é ligado para testar.
-- Budget alarm da AWS em 80% e 100% desde o primeiro dia.
+- Budget alarm da AWS em 80% e 100% desde o primeiro dia. O e-mail de destino é passado na linha de comando do bootstrap e nunca vai para o repositório, que é público.
+- Estimativa (preços de lista, a confirmar): com 5 tasks em Spot ARM e prod desligado de madrugada, ~US$ 32/mês (~R$ 175), um pouco acima do orçamento; o risco foi aceito (ADR 0004). Com Spot, o IPv4 público (~US$ 3,65 por task por mês) é o maior custo por task.
 - Sem load balancer: a entrada é o API Gateway HTTP API, cobrado por requisição, e o VPC Link e o Cloud Map não têm custo fixo relevante. Isso evita o custo por hora de um ALB em cada ambiente.
 - Valores de Fargate, API Gateway, Bedrock e WhatsApp em `us-east-1` a confirmar nas páginas de preço antes do primeiro deploy.
 
@@ -48,7 +51,7 @@ O staging fica desligado por padrão e o administrador liga só quando vai testa
 
 | Camada | O que tem | Quando o staging está desligado |
 | --- | --- | --- |
-| `staging/base` (sempre ligada) | DynamoDB, SNS/SQS, bucket S3, Secrets Manager, KMS, repositórios ECR, API Gateway, VPC Link e namespace do Cloud Map | Continua existindo; custo mínimo (on-demand sem tráfego, mais o valor fixo de segredos e chaves); a URL do webhook não muda |
+| `staging/base` (sempre ligada) | DynamoDB, SNS/SQS, bucket S3, Secrets Manager, KMS, API Gateway, VPC Link e namespace do Cloud Map (os repositórios ECR ficam em `envs/shared`) | Continua existindo; custo mínimo (on-demand sem tráfego, mais o valor fixo de segredos e chaves); a URL do webhook não muda |
 | `staging/compute` (liga/desliga) | Serviços ECS, schedules do EventBridge | Destruída: sem custo de Fargate |
 
 **Como operar**

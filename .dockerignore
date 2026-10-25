@@ -1,0 +1,10 @@
+# The Dockerfile copies only go.mod, go.sum, cmd/, internal/ and pkg/; keep the build context small anyway.
+.git
+.github
+.claude
+docs
+infra
+e2e
+scripts
+*.md
+bin

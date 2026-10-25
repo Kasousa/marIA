@@ -35,6 +35,8 @@ linters:
           msg: "use slog via pkg/logging (fmt.Print bypasses masking)"
         - pattern: '^os\.Getenv$'
           msg: "read configuration only in internal/<svc>/config.go"
+        - pattern: '^middleware\.(Recoverer|Logger)$'
+          msg: "use pkg/httpx.Recoverer (chi middleware logs outside slog, unmasked)"
     misspell:
       locale: US
   exclusions:

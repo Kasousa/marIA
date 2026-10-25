@@ -10,6 +10,8 @@ import (
 
 var table = "maria-reminders-staging" // want: table owned by reminders
 
+var region = os.Getenv("AWS_REGION") // want: env read outside config.go
+
 func handle() {
 	now := time.Now()                                 // want: injected clock
 	logger.Info("received", "text", msg)              // want: unmasked text

@@ -15,6 +15,18 @@ Formato:
 
 ---
 
+## 2026-10-25 · feature/fase-1-monorepo · P1-01, P1-02, P1-03
+- Feito: go.mod, serviço hello (/healthz, healthcheck, SIGTERM), pkg/logging (Mask e handler que mascara qualquer tipo sob chave sensível e telefones em erros), pkg/httpx.Recoverer, Dockerfile arm64 distroless, regra 7 do archcheck (env só no config.go). P1-01, P1-02 e P1-03 em done_local.
+- Verificado com: `make check` (exit 0, lint 0 issues, harness-test 72), binário testado à mão, revisão do architecture-guardian com as correções aplicadas, imagem arm64 construída e testada no Docker local.
+- Pendente / bloqueios: fixar imagens base por digest (passo 12). Terraform local 1.5.7 precisa ir para 1.10+ antes do passo 5.
+- Próximo passo: merge do PR na develop; depois, feature/fase-1-terraform (passo 5, bootstrap).
+
+## 2026-10-25 · feature/fase-1-monorepo · plano da Fase 1 e ADR 0004
+- Feito: plano da Fase 1 revisado (/plan-phase), D1-D5 respondidas. ADR 0004: uma task por serviço em Fargate Spot ARM nos dois ambientes, prod desligado 00:00-05:50, ReminderDue com mais de 15 min de atraso descartado, risco de custo (~US$ 32/mês) aceito. Spec, CLAUDE.md, infra/CLAUDE.md e features P1-04, P1-07 e P3-05 atualizados.
+- Verificado com: e-mail do budget fora do repositório (grep); features.json validado com jq.
+- Pendente / bloqueios: aprovação do plano pelo administrador; Terraform local 1.5.7 precisa ir para 1.10+ antes do passo 5.
+- Próximo passo: com o plano aprovado, passo 1 (go.mod e serviço hello) nesta branch.
+
 ## 2026-10-24 · feature/adr-0003-infra · melhorias do harness
 - Feito: testes do harness no repo (scripts/test-harness.sh + fixtures em scripts/testdata, `make harness-test` no `make check`); spec dividida em docs/spec/ com glossário; CLAUDE.md por pasta (infra/, .github/, e2e/); rotação do progress por fase; catálogo de eventos gerado como critério da P2-01.
 - Verificado com: `make harness-test` (71 casos), teste de mutação (regra de push quebrada de propósito, 12 falhas detectadas), `scripts/archcheck.sh` ok, nenhuma linha da spec antiga perdida na divisão.

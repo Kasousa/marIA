@@ -87,6 +87,14 @@ while IFS=: read -r f line content; do
   report "$f:$line" "log attribute looks like message text or phone; wrap it with logging.Mask()"
 done < <(grep -rnE '\.(Info|Warn|Error|Debug|Log)(Context)?\(.*"(phone|to|from|text|body|message|caption)"' --include='*.go' --exclude-dir=testdata internal cmd pkg 2>/dev/null | grep -v '_test\.go:')
 
+# Rule 7: configuration is read from the environment only in internal/<svc>/config.go.
+# (forbidigo misses package-level variables; this grep does not.)
+while IFS=: read -r f line content; do
+  [[ "$content" == *archcheck:allow* ]] && continue
+  [[ "$f" =~ ^internal/[a-z]+/config\.go$ ]] && continue
+  report "$f:$line" "read environment variables only in internal/<svc>/config.go"
+done < <(grep -rnE 'os\.(Getenv|LookupEnv|Environ)\(' --include='*.go' --exclude-dir=testdata internal cmd pkg 2>/dev/null | grep -v '_test\.go:')
+
 if [[ $fail -ne 0 ]]; then
   echo "archcheck: FAILED (see CLAUDE.md, Regras de arquitetura)"
   exit 1

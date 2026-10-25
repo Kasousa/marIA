@@ -63,6 +63,7 @@ Todos os lembretes usam EventBridge Scheduler com fuso `America/Sao_Paulo`, num 
 - Um schedule de remédio por horário, não por remédio: o payload aponta para o horário, e o serviço busca no DynamoDB quais remédios ativos caem nele. Assim, remédios no mesmo horário viram uma mensagem só.
 - Payload do evento: `{"type": "medication" | "appointment", "user_id": "...", "ref": "MED-13:00" | "APPT#..."}`.
 - Ao receber `ReminderDue`, o reminders-service confere no DynamoDB se o item ainda está ativo. Se foi cancelado, descarta.
+- Um `ReminderDue` que chega com mais de `REMINDER_MAX_DELAY` (padrão 15 min) de atraso em relação ao horário agendado é descartado e registrado em log, sem mensagem. Isso cobre a janela em que prod fica desligado (00:00 às 05:50) e longas interrupções do Fargate Spot (ADR 0004).
 - Retry do Scheduler: 3 tentativas, com DLQ `reminder-due-dlq` e alarme quando ela tiver mensagens.
 
 A antecedência do lembrete de consulta e o horário padrão dos remédios ficam em variáveis de ambiente (`APPOINTMENT_LEAD_TIME`, `MEDICATION_DEFAULT_TIME`). Em prod valem 1h e 13:00; em staging a antecedência pode cair para 2 minutos, para testar o fluxo inteiro sem esperar.

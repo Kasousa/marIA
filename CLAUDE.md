@@ -39,6 +39,7 @@ A especificação está em docs/spec/ (um arquivo por área; índice e glossári
 - Imagem do Snoopy em ~1/3 das mensagens proativas, sem repetir em 14 dias.
 - Relay: no máximo um aviso pendente para o administrador; pendentes entregues em ordem, com prefixo [STAGING] ou [PROD].
 - Só números na allowlist do ambiente são atendidos.
+- Prod desligado das 00:00 às 05:50; ReminderDue com mais de REMINDER_MAX_DELAY (15 min) de atraso é descartado (ADR 0004).
 
 ## Segurança e logs
 - Nunca logar texto de mensagem ou telefone em claro: use pkg/logging.Mask().
