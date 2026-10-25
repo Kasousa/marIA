@@ -1,0 +1,422 @@
+{
+  "_instructions": "Fonte do estado do roteiro (docs/spec.md, seção Roteiro). Status: todo | in_progress | done_local | verified_staging | released. Avance o status só com evidência e registre-a em 'evidence'. Não remova features nem altere 'acceptance' sem pedido do administrador.",
+  "features": [
+    {
+      "id": "P1-01",
+      "phase": 1,
+      "title": "Monorepo Go com serviço hello",
+      "acceptance": [
+        "go.mod na raiz",
+        "cmd/hello com /healthz",
+        "make check verde"
+      ],
+      "status": "todo",
+      "evidence": ""
+    },
+    {
+      "id": "P1-02",
+      "phase": 1,
+      "title": "pkg/logging com Mask()",
+      "acceptance": [
+        "Mask de telefone E.164 e de texto livre",
+        "testes table-driven"
+      ],
+      "status": "todo",
+      "evidence": ""
+    },
+    {
+      "id": "P1-03",
+      "phase": 1,
+      "title": "Dockerfile multi-stage distroless",
+      "acceptance": [
+        "imagem final distroless/static",
+        "um Dockerfile parametrizado por serviço"
+      ],
+      "status": "todo",
+      "evidence": ""
+    },
+    {
+      "id": "P1-04",
+      "phase": 1,
+      "title": "Bootstrap do Terraform e módulo github-oidc",
+      "acceptance": [
+        "state remoto em S3 com lock nativo",
+        "role de staging assumível só pela develop, release/* e hotfix/*",
+        "role de prod só pela main no environment production",
+        "jobs de feature/* sem acesso à AWS"
+      ],
+      "status": "todo",
+      "evidence": ""
+    },
+    {
+      "id": "P1-05",
+      "phase": 1,
+      "title": "staging/base",
+      "acceptance": [
+        "network, ECR, KMS, secrets vazios",
+        "terraform validate verde"
+      ],
+      "status": "todo",
+      "evidence": ""
+    },
+    {
+      "id": "P1-06",
+      "phase": 1,
+      "title": "staging/compute com hello",
+      "acceptance": [
+        "ALB HTTPS + ECS Fargate Spot",
+        "health check verde"
+      ],
+      "status": "todo",
+      "evidence": ""
+    },
+    {
+      "id": "P1-07",
+      "phase": 1,
+      "title": "Ambiente prod",
+      "acceptance": [
+        "mesmos módulos de staging",
+        "circuit breaker com rollback",
+        "budget alarm 80% e 100%"
+      ],
+      "status": "todo",
+      "evidence": ""
+    },
+    {
+      "id": "P1-08",
+      "phase": 1,
+      "title": "Workflow ci",
+      "acceptance": [
+        "roda em PRs para develop e main",
+        "lint, archcheck, go test ./... -race (portão), build, terraform plan do destino",
+        "PR para a main: origem release/x.y.z ou hotfix/x.y.z, status staging-ok e origem contém a main atual"
+      ],
+      "status": "todo",
+      "evidence": ""
+    },
+    {
+      "id": "P1-09",
+      "phase": 1,
+      "title": "Workflow deploy-staging",
+      "acceptance": [
+        "roda em push na develop, release/** e hotfix/**",
+        "tag = git rev-parse HEAD^{tree}",
+        "liga staging, deploy, E2E, tag e status staging-ok",
+        "step Playwright previsto e desligado",
+        "um deploy de staging por vez (concurrency)"
+      ],
+      "status": "todo",
+      "evidence": ""
+    },
+    {
+      "id": "P1-10",
+      "phase": 1,
+      "title": "Workflow deploy-prod",
+      "acceptance": [
+        "exige staging-ok pelo hash da árvore",
+        "aprovação no environment production",
+        "deploy sem rebuild, smoke test",
+        "tag vx.y.z a partir do nome da branch mesclada",
+        "link do PR de back-merge no resumo da run"
+      ],
+      "status": "todo",
+      "evidence": ""
+    },
+    {
+      "id": "P1-11",
+      "phase": 1,
+      "title": "Workflow staging-power",
+      "acceptance": [
+        "manual on/off",
+        "desliga sozinho às 23h"
+      ],
+      "status": "todo",
+      "evidence": ""
+    },
+    {
+      "id": "P1-12",
+      "phase": 1,
+      "title": "Proteção de develop e main",
+      "acceptance": [
+        "sem push direto",
+        "ci obrigatório",
+        "main só aceita release/* e hotfix/*, com merge commit"
+      ],
+      "status": "todo",
+      "evidence": ""
+    },
+    {
+      "id": "P1-13",
+      "phase": 1,
+      "title": "Prova do Git Flow completo",
+      "acceptance": [
+        "um teste quebrado de propósito bloqueia o PR",
+        "hello em staging por merge na develop",
+        "release/0.1.0 validada em staging chega em prod e volta para a develop pelo back-merge"
+      ],
+      "status": "todo",
+      "evidence": ""
+    },
+    {
+      "id": "P2-01",
+      "phase": 2,
+      "title": "pkg/events: envelope e eventos de mensagem",
+      "acceptance": [
+        "MessageReceived, SendMessage, MessageSent",
+        "event_id, occurred_at ISO 8601 com offset",
+        "testes de serialização"
+      ],
+      "status": "todo",
+      "evidence": ""
+    },
+    {
+      "id": "P2-02",
+      "phase": 2,
+      "title": "pkg/idempotency",
+      "acceptance": [
+        "tabela maria-idempotency com TTL de 7 dias",
+        "chave <servico>#<message_id>",
+        "fake para testes"
+      ],
+      "status": "todo",
+      "evidence": ""
+    },
+    {
+      "id": "P2-03",
+      "phase": 2,
+      "title": "whatsapp-gateway",
+      "acceptance": [
+        "valida X-Hub-Signature-256",
+        "responde 200 em menos de 5s",
+        "filtra allowlist",
+        "publica MessageReceived"
+      ],
+      "status": "todo",
+      "evidence": ""
+    },
+    {
+      "id": "P2-04",
+      "phase": 2,
+      "title": "conversation: conversa básica",
+      "acceptance": [
+        "Bedrock Converse com Haiku 4.5",
+        "histórico de 20 mensagens",
+        "resposta carinhosa para áudio/imagem",
+        "limite de 1.024 tokens"
+      ],
+      "status": "todo",
+      "evidence": ""
+    },
+    {
+      "id": "P2-05",
+      "phase": 2,
+      "title": "outbound: envio à Meta",
+      "acceptance": [
+        "decide template x texto livre por last_inbound_at",
+        "retry com backoff exponencial",
+        "publica MessageSent"
+      ],
+      "status": "todo",
+      "evidence": ""
+    },
+    {
+      "id": "P2-06",
+      "phase": 2,
+      "title": "E2E: resposta livre",
+      "acceptance": [
+        "webhook assinado do simulador gera resposta",
+        "DLQs vazias"
+      ],
+      "status": "todo",
+      "evidence": ""
+    },
+    {
+      "id": "P3-01",
+      "phase": 3,
+      "title": "reminders: API interna e tabela",
+      "acceptance": [
+        "HTTP via Service Connect",
+        "só aceita o security group do conversation"
+      ],
+      "status": "todo",
+      "evidence": ""
+    },
+    {
+      "id": "P3-02",
+      "phase": 3,
+      "title": "Consultas",
+      "acceptance": [
+        "register/reschedule/cancel",
+        "schedule at() com APPOINTMENT_LEAD_TIME",
+        "sem lembrete se faltar menos que o lead time"
+      ],
+      "status": "todo",
+      "evidence": ""
+    },
+    {
+      "id": "P3-03",
+      "phase": 3,
+      "title": "Remédios",
+      "acceptance": [
+        "um schedule por horário",
+        "remédios do mesmo horário numa mensagem",
+        "EndDate quando houver prazo"
+      ],
+      "status": "todo",
+      "evidence": ""
+    },
+    {
+      "id": "P3-04",
+      "phase": 3,
+      "title": "Ferramentas do Bedrock",
+      "acceptance": [
+        "7 ferramentas da spec com schema",
+        "datas no futuro e horário válido",
+        "modelo nunca grava direto"
+      ],
+      "status": "todo",
+      "evidence": ""
+    },
+    {
+      "id": "P3-05",
+      "phase": 3,
+      "title": "Consumidor ReminderDue",
+      "acceptance": [
+        "descarta item cancelado",
+        "DLQ reminder-due-dlq com alarme"
+      ],
+      "status": "todo",
+      "evidence": ""
+    },
+    {
+      "id": "P3-06",
+      "phase": 3,
+      "title": "Templates de remédio e consulta aprovados",
+      "acceptance": [
+        "aprovados nas contas de staging e prod"
+      ],
+      "status": "todo",
+      "evidence": ""
+    },
+    {
+      "id": "P3-07",
+      "phase": 3,
+      "title": "Recriar schedules ao religar staging",
+      "acceptance": [
+        "schedules recriados a partir dos itens ativos"
+      ],
+      "status": "todo",
+      "evidence": ""
+    },
+    {
+      "id": "P3-08",
+      "phase": 3,
+      "title": "E2E: consulta e remédio",
+      "acceptance": [
+        "lembrete de consulta chega com lead time de 2 min em staging"
+      ],
+      "status": "todo",
+      "evidence": ""
+    },
+    {
+      "id": "P4-01",
+      "phase": 4,
+      "title": "relay",
+      "acceptance": [
+        "no máximo um aviso pendente",
+        "botão Ver agora entrega pendentes em ordem",
+        "prefixo [STAGING] ou [PROD]"
+      ],
+      "status": "todo",
+      "evidence": ""
+    },
+    {
+      "id": "P4-02",
+      "phase": 4,
+      "title": "Go-live",
+      "acceptance": [
+        "primeira promoção para prod",
+        "cliente recebe o primeiro lembrete real"
+      ],
+      "status": "todo",
+      "evidence": ""
+    },
+    {
+      "id": "P5-01",
+      "phase": 5,
+      "title": "Planejamento diário de água",
+      "acceptance": [
+        "06:00 sorteia WATER_REMINDERS_PER_DAY em WATER_WINDOW com WATER_MIN_GAP",
+        "pula se cair a menos de 30 min de outro lembrete"
+      ],
+      "status": "todo",
+      "evidence": ""
+    },
+    {
+      "id": "P5-02",
+      "phase": 5,
+      "title": "Pausa e retomada da água",
+      "acceptance": [
+        "pause cancela os pendentes do dia",
+        "resume vale a partir do próximo planejamento"
+      ],
+      "status": "todo",
+      "evidence": ""
+    },
+    {
+      "id": "P5-03",
+      "phase": 5,
+      "title": "Templates de água e E2E",
+      "acceptance": [
+        "10 variações aprovadas",
+        "E2E com janela encurtada"
+      ],
+      "status": "todo",
+      "evidence": ""
+    },
+    {
+      "id": "P6-01",
+      "phase": 6,
+      "title": "Imagens do Snoopy",
+      "acceptance": [
+        "upload pela Media API",
+        "~1/3 das proativas com imagem",
+        "sem repetir em 14 dias",
+        "JPEG/PNG até 5 MB"
+      ],
+      "status": "todo",
+      "evidence": ""
+    },
+    {
+      "id": "P6-02",
+      "phase": 6,
+      "title": "Templates com cabeçalho de imagem",
+      "acceptance": [
+        "variantes _img aprovadas"
+      ],
+      "status": "todo",
+      "evidence": ""
+    },
+    {
+      "id": "P7-01",
+      "phase": 7,
+      "title": "Testes de falha",
+      "acceptance": [
+        "Meta fora, Bedrock lento, mensagem duplicada",
+        "nenhuma mensagem perdida ou duplicada"
+      ],
+      "status": "todo",
+      "evidence": ""
+    },
+    {
+      "id": "P7-02",
+      "phase": 7,
+      "title": "Revisão de custos",
+      "acceptance": [
+        "dentro de R$150/mês para os dois ambientes"
+      ],
+      "status": "todo",
+      "evidence": ""
+    }
+  ]
+}

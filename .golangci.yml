@@ -1,0 +1,54 @@
+version: "2"
+
+run:
+  timeout: 5m
+
+linters:
+  default: standard
+  enable:
+    - bodyclose
+    - contextcheck
+    - depguard
+    - errorlint
+    - forbidigo
+    - gosec
+    - misspell
+    - noctx
+    - revive
+    - unparam
+  settings:
+    depguard:
+      rules:
+        logging:
+          files: ["$all"]
+          deny:
+            - pkg: "log$"
+              desc: "use log/slog through pkg/logging"
+        aws-sdk-v1:
+          files: ["$all"]
+          deny:
+            - pkg: "github.com/aws/aws-sdk-go/"
+              desc: "use aws-sdk-go-v2"
+    forbidigo:
+      forbid:
+        - pattern: '^fmt\.Print(f|ln)?$'
+          msg: "use slog via pkg/logging (fmt.Print bypasses masking)"
+        - pattern: '^os\.Getenv$'
+          msg: "read configuration only in internal/<svc>/config.go"
+    misspell:
+      locale: US
+  exclusions:
+    rules:
+      - path: _test\.go
+        linters: [gosec, forbidigo]
+      - path: internal/[a-z]+/config\.go
+        text: "os.Getenv"
+        linters: [forbidigo]
+      - path: e2e/
+        text: "os.Getenv"
+        linters: [forbidigo]
+
+formatters:
+  enable:
+    - gofmt
+    - goimports
